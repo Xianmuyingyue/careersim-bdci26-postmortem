@@ -1,0 +1,38 @@
+# Environment & secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Large run artifacts — intentionally excluded from this repository
+*.zip
+*.pdf
+*.log
+*.out
+*.data
+replays/
+runs/

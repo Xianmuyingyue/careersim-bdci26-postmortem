@@ -1,0 +1,6 @@
+{
+  "team": "九问",
+  "name": "career-sim-agent",
+  "mode": "agent",
+  "instruction": "严格执行三类技能：先用 situation-awareness 读取并结构化局势；再用 risk-guardian 检查红线距离并给出安全约束；最后由 decision-policy 在安全约束内选择季度体力行动、季度主行动与月度剧情选项。任何时刻不得二次调用 new_game；未看到结束信号前不要停止。"
+}
