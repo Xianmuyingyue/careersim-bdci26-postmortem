@@ -40,7 +40,7 @@
 
 同一套策略，在不同随机流下会走向截然不同的结局。我们把六盘典型对局做成了**可交互网页**，支持逐月拖动与播放回放：
 
-**▶ [打开交互案例集 `cases.html`](cases.html)**
+**▶ [在线打开交互案例集](https://xianmuyingyue.github.io/careersim-bdci26-postmortem/cases.html)**（或在浏览器直接打开仓库内的 `cases.html`，单文件零依赖）
 
 | 案例 | 量化分 | 终局 | 月数 | 结局 |
 | --- | -: | :-- | -: | :-- |
