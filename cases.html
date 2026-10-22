@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CareerSim 典型对局 · 牛马案例集</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#131c2e; --panel2:#0f1829; --line:#1f2b42;
+    --txt:#e6edf7; --muted:#8b9bb4; --accent:#4ea1ff;
+    --lv:#7aa2f7; --sk:#34d399; --wl:#f59e0b; --bad:#ef4444; --ok:#22c55e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  header{padding:34px 28px 18px;max-width:1240px;margin:0 auto}
+  h1{margin:0 0 6px;font-size:26px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:14px}
+  .kpis{display:flex;gap:26px;margin-top:16px;flex-wrap:wrap}
+  .kpi b{display:block;font-size:22px;color:var(--accent);font-variant-numeric:tabular-nums}
+  .kpi span{color:var(--muted);font-size:12px}
+  main{max-width:1240px;margin:0 auto;padding:0 28px 60px}
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
+    gap:12px;margin:14px 0 22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:13px 15px;cursor:pointer;transition:.16s;position:relative;overflow:hidden}
+  .card:hover{border-color:#31527f;transform:translateY(-2px)}
+  .card.on{border-color:var(--accent);background:#152238;
+    box-shadow:0 0 0 1px var(--accent) inset}
+  .card .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;
+    background:#1d2b45;color:#9fc0ee;margin-bottom:8px}
+  .card h3{margin:0 0 4px;font-size:15px}
+  .card .num{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+  .card .meta{color:var(--muted);font-size:12px;margin-top:6px}
+  .board{background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+    padding:18px 18px 8px}
+  .board-head{display:flex;justify-content:space-between;align-items:flex-start;
+    gap:16px;flex-wrap:wrap;margin-bottom:10px}
+  .board-head h2{margin:0;font-size:18px}
+  .note{color:var(--muted);font-size:13px;max-width:640px;margin-top:4px}
+  canvas{width:100%;height:auto;display:block}
+  .ctrl{display:flex;align-items:center;gap:14px;padding:10px 2px 16px;flex-wrap:wrap}
+  button{background:#1b2a44;color:var(--txt);border:1px solid #2b3e5e;border-radius:8px;
+    padding:7px 15px;cursor:pointer;font-size:14px}
+  button:hover{border-color:var(--accent);color:#cfe4ff}
+  input[type=range]{flex:1;min-width:180px;accent-color:var(--accent)}
+  .mlabel{font-variant-numeric:tabular-nums;color:var(--muted);min-width:52px;
+    text-align:right;font-size:14px}
+  .state{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
+    gap:9px;padding:4px 2px 14px}
+  .cell{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+  .cell .k{color:var(--muted);font-size:11px}
+  .cell .v{font-size:17px;font-variant-numeric:tabular-nums}
+  footer{max-width:1240px;margin:0 auto;padding:0 28px 44px;color:var(--muted);font-size:12px}
+  .legend{display:flex;gap:18px;color:var(--muted);font-size:12px;padding:0 2px 8px}
+  .legend i{display:inline-block;width:16px;height:3px;border-radius:2px;
+    vertical-align:middle;margin-right:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>CareerSim 典型对局 · 牛马案例集</h1>
+  <div class="sub">同一套策略，六种活法。拖动时间轴，看每一步怎么把人推向不同结局。</div>
+  <div class="kpis">
+    <div class="kpi"><b id="k1">6</b><span>典型对局</span></div>
+    <div class="kpi"><b id="k2">76.28</b><span>最高量化分</span></div>
+    <div class="kpi"><b id="k3">L6</b><span>最高终局职级</span></div>
+  </div>
+</header>
+<main>
+  <section class="cases" id="cases"></section>
+  <section class="board">
+    <div class="board-head">
+      <div>
+        <h2 id="bTitle">—</h2>
+        <div class="note" id="bNote"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#7aa2f7"></i>职级</span>
+      <span><i style="background:#34d399"></i>技能</span>
+      <span><i style="background:#f59e0b"></i>财富</span>
+      <span><i style="background:#ef4444"></i>M24 处决点</span>
+    </div>
+    <canvas id="cv" width="1200" height="440"></canvas>
+    <div class="ctrl">
+      <button id="play">▶ 播放</button>
+      <button id="reset">回到结尾</button>
+      <input type="range" id="slider" min="1" max="48" value="48">
+      <span class="mlabel" id="mlabel">M48</span>
+    </div>
+    <div class="state" id="state"></div>
+  </section>
+</main>
+<footer>
+  数据来源：本队 116 局本地自建评测记录，选取 6 盘典型对局。<br>
+  为保护赛事内容与他人隐私，本页仅展示数值轨迹，不转载赛事剧情文本；对局标识保留原始 run id。
+</footer>
+<script>
+const DATA = [{"id":"20260929T004231Z","tag":"天花板","headline":"六年爬到 L6","note":"节奏教科书：几乎每 6 个月稳升一级；L4→L5 卡了整整 12 个月，靠技能破壁后才在 M42 摸到 L6。","quant":76.28,"grade":"A","outcome":"completed","months":48,"finalLevel":6,"wealth":33.1,"traj":[{"m":1,"l":1,"s":4,"n":2,"o":1.0,"w":1.0,"h":5,"d":7},{"m":2,"l":1,"s":8,"n":3,"o":1.0,"w":1.0,"h":4,"d":9},{"m":3,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":6,"d":10},{"m":4,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":5,"d":10},{"m":5,"l":1,"s":9,"n":3,"o":3.0,"w":2.0,"h":5,"d":10},{"m":6,"l":2,"s":13,"n":7,"o":4.0,"w":2.0,"h":5,"d":10},{"m":7,"l":2,"s":18,"n":7,"o":5.0,"w":2.0,"h":4,"d":10},{"m":8,"l":2,"s":18,"n":7,"o":4.0,"w":3.0,"h":4,"d":10},{"m":9,"l":2,"s":20,"n":7,"o":5.0,"w":3.0,"h":4,"d":10},{"m":10,"l":2,"s":21,"n":7,"o":5.0,"w":3.0,"h":4,"d":10},{"m":11,"l":2,"s":21,"n":7,"o":6.0,"w":4.0,"h":4,"d":10},{"m":12,"l":3,"s":26,"n":10,"o":6.0,"w":4.0,"h":6,"d":10},{"m":13,"l":3,"s":29,"n":14,"o":8.0,"w":5.0,"h":6,"d":10},{"m":14,"l":3,"s":32,"n":15,"o":6.0,"w":5.0,"h":8,"d":10},{"m":15,"l":3,"s":38,"n":16,"o":10.0,"w":6.0,"h":7,"d":10},{"m":16,"l":3,"s":41,"n":19,"o":13.0,"w":6.0,"h":5,"d":10},{"m":17,"l":3,"s":42,"n":21,"o":15.0,"w":5.0,"h":5,"d":10},{"m":18,"l":4,"s":46,"n":18,"o":16.0,"w":6.0,"h":6,"d":10},{"m":19,"l":4,"s":52,"n":23,"o":16.0,"w":6.0,"h":5,"d":10},{"m":20,"l":4,"s":57,"n":28,"o":20.0,"w":7.0,"h":3,"d":10},{"m":21,"l":4,"s":61,"n":31,"o":19.0,"w":9.0,"h":5,"d":10},{"m":22,"l":4,"s":65,"n":33,"o":18.0,"w":9.0,"h":5,"d":10},{"m":23,"l":4,"s":69,"n":36,"o":18.0,"w":10.0,"h":5,"d":10},{"m":24,"l":4,"s":72,"n":36,"o":23.0,"w":12.0,"h":8,"d":10},{"m":25,"l":4,"s":75,"n":36,"o":24.0,"w":13.0,"h":7,"d":10},{"m":26,"l":4,"s":80,"n":36,"o":22.0,"w":14.0,"h":7,"d":10},{"m":27,"l":4,"s":86,"n":36,"o":23.0,"w":14.0,"h":7,"d":10},{"m":28,"l":4,"s":90,"n":36,"o":23.0,"w":15.0,"h":7,"d":10},{"m":29,"l":4,"s":90,"n":36,"o":23.0,"w":16.0,"h":7,"d":10},{"m":30,"l":5,"s":95,"n":37,"o":26.0,"w":17.0,"h":7,"d":10},{"m":31,"l":5,"s":97,"n":39,"o":26.0,"w":19.0,"h":7,"d":10},{"m":32,"l":5,"s":100,"n":38,"o":27.0,"w":20.0,"h":9,"d":10},{"m":33,"l":5,"s":104,"n":44,"o":28.0,"w":21.0,"h":7,"d":10},{"m":34,"l":5,"s":109,"n":47,"o":29.0,"w":22.0,"h":6,"d":10},{"m":35,"l":5,"s":112,"n":50,"o":28.0,"w":20.0,"h":6,"d":10},{"m":36,"l":5,"s":116,"n":53,"o":28.0,"w":22.0,"h":6,"d":10},{"m":37,"l":5,"s":120,"n":54,"o":25.0,"w":23.0,"h":4,"d":10},{"m":38,"l":5,"s":125,"n":54,"o":26.0,"w":24.0,"h":3,"d":10},{"m":39,"l":5,"s":129,"n":54,"o":27.0,"w":23.0,"h":7,"d":10},{"m":40,"l":5,"s":130,"n":54,"o":31.0,"w":24.0,"h":7,"d":10},{"m":41,"l":5,"s":133,"n":54,"o":33.0,"w":25.0,"h":7,"d":10},{"m":42,"l":6,"s":136,"n":55,"o":35.0,"w":27.0,"h":8,"d":10},{"m":43,"l":6,"s":138,"n":55,"o":37.0,"w":29.0,"h":8,"d":10},{"m":44,"l":6,"s":140,"n":55,"o":38.0,"w":30.0,"h":8,"d":10},{"m":45,"l":6,"s":146,"n":58,"o":40.0,"w":32.0,"h":8,"d":10},{"m":46,"l":6,"s":149,"n":59,"o":43.0,"w":30.0,"h":8,"d":10},{"m":47,"l":6,"s":152,"n":59,"o":45.0,"w":32.0,"h":8,"d":10},{"m":48,"l":6,"s":155,"n":63,"o":49.0,"w":31.0,"h":10,"d":10}]},{"id":"20260928T231132Z","tag":"最痛","headline":"第 45 个月，差一步","note":"已经 L5、财富 23.5，第 45 个月倒下——距离终点只剩 3 个月。这是最典型的“晚节不保”。","quant":57.62,"grade":"C","outcome":"eliminated","months":45,"finalLevel":5,"wealth":23.5,"traj":[{"m":1,"l":1,"s":2,"n":3,"o":1.0,"w":1.0,"h":4,"d":6},{"m":2,"l":1,"s":9,"n":1,"o":0.0,"w":1.0,"h":4,"d":8},{"m":3,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":6,"d":10},{"m":4,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":5,"d":10},{"m":5,"l":1,"s":9,"n":3,"o":3.0,"w":2.0,"h":4,"d":10},{"m":6,"l":2,"s":14,"n":7,"o":4.0,"w":2.0,"h":6,"d":10},{"m":7,"l":2,"s":18,"n":7,"o":6.0,"w":2.0,"h":4,"d":10},{"m":8,"l":2,"s":21,"n":7,"o":6.0,"w":3.0,"h":1,"d":9},{"m":9,"l":2,"s":21,"n":7,"o":6.0,"w":3.0,"h":5,"d":10},{"m":10,"l":2,"s":21,"n":7,"o":6.0,"w":3.0,"h":4,"d":10},{"m":11,"l":2,"s":21,"n":6,"o":6.0,"w":4.0,"h":4,"d":10},{"m":12,"l":3,"s":26,"n":9,"o":4.0,"w":4.0,"h":6,"d":10},{"m":13,"l":3,"s":28,"n":11,"o":4.0,"w":5.0,"h":6,"d":10},{"m":14,"l":3,"s":30,"n":13,"o":6.0,"w":5.0,"h":7,"d":10},{"m":15,"l":3,"s":36,"n":19,"o":11.0,"w":6.0,"h":7,"d":10},{"m":16,"l":3,"s":40,"n":21,"o":14.0,"w":7.0,"h":7,"d":10},{"m":17,"l":3,"s":42,"n":21,"o":15.0,"w":8.0,"h":7,"d":10},{"m":18,"l":4,"s":44,"n":17,"o":16.0,"w":9.0,"h":6,"d":10},{"m":19,"l":4,"s":46,"n":19,"o":18.0,"w":7.0,"h":5,"d":10},{"m":20,"l":4,"s":48,"n":19,"o":20.0,"w":8.0,"h":5,"d":10},{"m":21,"l":4,"s":49,"n":18,"o":20.0,"w":9.0,"h":7,"d":10},{"m":22,"l":4,"s":51,"n":20,"o":22.0,"w":9.0,"h":7,"d":10},{"m":23,"l":4,"s":53,"n":26,"o":22.0,"w":11.0,"h":5,"d":10},{"m":24,"l":4,"s":58,"n":33,"o":22.0,"w":12.0,"h":6,"d":10},{"m":25,"l":4,"s":63,"n":33,"o":24.0,"w":13.0,"h":6,"d":10},{"m":26,"l":4,"s":64,"n":36,"o":26.0,"w":14.0,"h":4,"d":10},{"m":27,"l":4,"s":71,"n":36,"o":25.0,"w":14.0,"h":7,"d":10},{"m":28,"l":4,"s":76,"n":36,"o":26.0,"w":16.0,"h":7,"d":10},{"m":29,"l":4,"s":79,"n":36,"o":26.0,"w":17.0,"h":7,"d":10},{"m":30,"l":4,"s":83,"n":36,"o":26.0,"w":18.0,"h":9,"d":10},{"m":31,"l":4,"s":84,"n":36,"o":25.0,"w":19.0,"h":10,"d":10},{"m":32,"l":4,"s":85,"n":36,"o":24.0,"w":20.0,"h":10,"d":10},{"m":33,"l":4,"s":89,"n":36,"o":24.0,"w":18.0,"h":9,"d":10},{"m":34,"l":4,"s":93,"n":35,"o":26.0,"w":19.0,"h":10,"d":10},{"m":35,"l":4,"s":93,"n":35,"o":26.0,"w":21.0,"h":10,"d":10},{"m":36,"l":5,"s":97,"n":37,"o":26.0,"w":23.0,"h":10,"d":10},{"m":37,"l":5,"s":99,"n":40,"o":27.0,"w":24.0,"h":10,"d":10},{"m":38,"l":5,"s":101,"n":42,"o":28.0,"w":26.0,"h":10,"d":10},{"m":39,"l":5,"s":105,"n":44,"o":28.0,"w":27.0,"h":9,"d":10},{"m":40,"l":5,"s":107,"n":47,"o":30.0,"w":28.0,"h":8,"d":9},{"m":41,"l":5,"s":108,"n":48,"o":32.0,"w":29.0,"h":10,"d":9},{"m":42,"l":5,"s":111,"n":50,"o":33.0,"w":30.0,"h":9,"d":10},{"m":43,"l":5,"s":114,"n":53,"o":34.0,"w":31.0,"h":9,"d":10},{"m":44,"l":5,"s":113,"n":54,"o":28.0,"w":30.0,"h":10,"d":8},{"m":45,"l":5,"s":114,"n":54,"o":30.0,"w":23.0,"h":10,"d":8}]},{"id":"20260925T042320Z","tag":"处决点","headline":"死在第 24 个月","note":"固定处决点准时生效。前 23 个月攒下的一切在此清零，连申诉的机会都没有。","quant":32.06,"grade":"D","outcome":"eliminated","months":24,"finalLevel":2,"wealth":7.4,"traj":[{"m":1,"l":1,"s":2,"n":1,"o":1.0,"w":1.0,"h":6,"d":6},{"m":2,"l":1,"s":5,"n":3,"o":1.0,"w":1.0,"h":6,"d":8},{"m":3,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":8,"d":10},{"m":4,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":8,"d":10},{"m":5,"l":1,"s":9,"n":2,"o":3.0,"w":3.0,"h":7,"d":10},{"m":6,"l":1,"s":9,"n":3,"o":3.0,"w":3.0,"h":10,"d":10},{"m":7,"l":1,"s":9,"n":3,"o":3.0,"w":3.0,"h":10,"d":10},{"m":8,"l":1,"s":9,"n":3,"o":3.0,"w":3.0,"h":8,"d":10},{"m":9,"l":1,"s":9,"n":3,"o":2.0,"w":4.0,"h":7,"d":10},{"m":10,"l":1,"s":9,"n":3,"o":3.0,"w":4.0,"h":5,"d":10},{"m":11,"l":1,"s":9,"n":3,"o":3.0,"w":4.0,"h":5,"d":10},{"m":12,"l":1,"s":9,"n":3,"o":3.0,"w":4.0,"h":10,"d":10},{"m":13,"l":1,"s":9,"n":2,"o":2.0,"w":5.0,"h":10,"d":10},{"m":14,"l":1,"s":9,"n":3,"o":2.0,"w":5.0,"h":10,"d":10},{"m":15,"l":1,"s":9,"n":3,"o":3.0,"w":5.0,"h":8,"d":10},{"m":16,"l":1,"s":9,"n":2,"o":3.0,"w":5.0,"h":9,"d":10},{"m":17,"l":1,"s":8,"n":3,"o":3.0,"w":6.0,"h":10,"d":10},{"m":18,"l":1,"s":9,"n":3,"o":2.0,"w":5.0,"h":10,"d":7},{"m":19,"l":1,"s":9,"n":3,"o":3.0,"w":6.0,"h":9,"d":9},{"m":20,"l":1,"s":9,"n":3,"o":3.0,"w":6.0,"h":7,"d":10},{"m":21,"l":1,"s":9,"n":3,"o":3.0,"w":6.0,"h":10,"d":10},{"m":22,"l":1,"s":9,"n":3,"o":2.0,"w":7.0,"h":9,"d":10},{"m":23,"l":1,"s":8,"n":1,"o":3.0,"w":7.0,"h":10,"d":10},{"m":24,"l":2,"s":9,"n":2,"o":3.0,"w":7.0,"h":10,"d":7}]},{"id":"20260928T115042Z","tag":"早夭","headline":"开局即崩","note":"第 3 个月出局，连第一轮评审都没等到。早期红线管理失败的标准结局。","quant":21.52,"grade":"E","outcome":"eliminated","months":3,"finalLevel":1,"wealth":1.6,"traj":[{"m":1,"l":1,"s":3,"n":1,"o":1.0,"w":1.0,"h":5,"d":8},{"m":2,"l":1,"s":7,"n":3,"o":1.0,"w":1.0,"h":2,"d":10},{"m":3,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":0,"d":10}]},{"id":"20260929T021657Z","tag":"天花板之二","headline":"活着走完，止步 L5","note":"48 个月全勤，却一辈子停在 L5。稳定，但也是一种隐形的天花板。","quant":48.89,"grade":"D","outcome":"eliminated","months":48,"finalLevel":5,"wealth":12.4,"traj":[{"m":1,"l":1,"s":3,"n":2,"o":1.0,"w":1.0,"h":4,"d":7},{"m":2,"l":1,"s":5,"n":2,"o":2.0,"w":1.0,"h":3,"d":10},{"m":3,"l":1,"s":8,"n":2,"o":3.0,"w":1.0,"h":6,"d":10},{"m":4,"l":1,"s":9,"n":3,"o":3.0,"w":1.0,"h":6,"d":10},{"m":5,"l":1,"s":9,"n":3,"o":2.0,"w":2.0,"h":7,"d":10},{"m":6,"l":1,"s":9,"n":3,"o":3.0,"w":2.0,"h":10,"d":10},{"m":7,"l":1,"s":9,"n":3,"o":3.0,"w":2.0,"h":10,"d":10},{"m":8,"l":1,"s":9,"n":3,"o":2.0,"w":2.0,"h":10,"d":10},{"m":9,"l":1,"s":9,"n":3,"o":3.0,"w":3.0,"h":7,"d":10},{"m":10,"l":1,"s":8,"n":2,"o":2.0,"w":3.0,"h":9,"d":10},{"m":11,"l":1,"s":9,"n":3,"o":2.0,"w":3.0,"h":9,"d":10},{"m":12,"l":1,"s":9,"n":3,"o":3.0,"w":3.0,"h":9,"d":10},{"m":13,"l":1,"s":9,"n":3,"o":3.0,"w":4.0,"h":8,"d":10},{"m":14,"l":1,"s":9,"n":3,"o":3.0,"w":5.0,"h":7,"d":10},{"m":15,"l":1,"s":9,"n":3,"o":3.0,"w":5.0,"h":10,"d":10},{"m":16,"l":1,"s":9,"n":3,"o":3.0,"w":5.0,"h":10,"d":10},{"m":17,"l":1,"s":9,"n":1,"o":3.0,"w":6.0,"h":8,"d":10},{"m":18,"l":2,"s":14,"n":3,"o":5.0,"w":6.0,"h":7,"d":10},{"m":19,"l":2,"s":17,"n":3,"o":6.0,"w":6.0,"h":7,"d":10},{"m":20,"l":2,"s":18,"n":1,"o":6.0,"w":7.0,"h":7,"d":10},{"m":21,"l":2,"s":20,"n":6,"o":6.0,"w":7.0,"h":7,"d":10},{"m":22,"l":2,"s":21,"n":7,"o":6.0,"w":7.0,"h":8,"d":10},{"m":23,"l":2,"s":21,"n":7,"o":6.0,"w":8.0,"h":8,"d":10},{"m":24,"l":3,"s":23,"n":6,"o":5.0,"w":5.0,"h":9,"d":10},{"m":25,"l":3,"s":24,"n":9,"o":5.0,"w":4.0,"h":9,"d":10},{"m":26,"l":3,"s":26,"n":10,"o":6.0,"w":2.0,"h":9,"d":10},{"m":27,"l":3,"s":33,"n":11,"o":11.0,"w":3.0,"h":6,"d":10},{"m":28,"l":3,"s":36,"n":14,"o":14.0,"w":3.0,"h":6,"d":10},{"m":29,"l":3,"s":41,"n":18,"o":16.0,"w":4.0,"h":4,"d":10},{"m":30,"l":4,"s":44,"n":17,"o":16.0,"w":6.0,"h":7,"d":10},{"m":31,"l":4,"s":48,"n":20,"o":18.0,"w":6.0,"h":7,"d":10},{"m":32,"l":4,"s":51,"n":22,"o":15.0,"w":7.0,"h":7,"d":10},{"m":33,"l":4,"s":55,"n":24,"o":17.0,"w":8.0,"h":7,"d":10},{"m":34,"l":4,"s":59,"n":27,"o":19.0,"w":8.0,"h":7,"d":10},{"m":35,"l":4,"s":65,"n":28,"o":22.0,"w":9.0,"h":5,"d":10},{"m":36,"l":4,"s":67,"n":30,"o":22.0,"w":10.0,"h":10,"d":10},{"m":37,"l":4,"s":70,"n":32,"o":22.0,"w":12.0,"h":10,"d":10},{"m":38,"l":4,"s":72,"n":31,"o":21.0,"w":13.0,"h":10,"d":10},{"m":39,"l":4,"s":79,"n":34,"o":21.0,"w":13.0,"h":9,"d":10},{"m":40,"l":4,"s":84,"n":35,"o":21.0,"w":14.0,"h":8,"d":10},{"m":41,"l":4,"s":86,"n":36,"o":21.0,"w":17.0,"h":8,"d":10},{"m":42,"l":4,"s":90,"n":36,"o":21.0,"w":14.0,"h":8,"d":10},{"m":43,"l":4,"s":92,"n":36,"o":25.0,"w":14.0,"h":8,"d":10},{"m":44,"l":4,"s":93,"n":36,"o":26.0,"w":15.0,"h":8,"d":10},{"m":45,"l":4,"s":95,"n":35,"o":26.0,"w":17.0,"h":9,"d":10},{"m":46,"l":4,"s":94,"n":36,"o":26.0,"w":18.0,"h":9,"d":10},{"m":47,"l":4,"s":95,"n":35,"o":26.0,"w":18.0,"h":9,"d":10},{"m":48,"l":5,"s":99,"n":34,"o":23.0,"w":12.0,"h":9,"d":8}]},{"id":"20260926T215108Z","tag":"刚抬头","headline":"刚升 L4 就没了","note":"好不容易爬过 L4 门槛，第 27 个月出局——晋升成了最后的告别。","quant":38.24,"grade":"D","outcome":"eliminated","months":27,"finalLevel":4,"wealth":11.3,"traj":[{"m":1,"l":1,"s":2,"n":3,"o":0.0,"w":1.0,"h":4,"d":7},{"m":2,"l":1,"s":5,"n":3,"o":1.0,"w":1.0,"h":4,"d":10},{"m":3,"l":1,"s":6,"n":3,"o":0.0,"w":1.0,"h":7,"d":10},{"m":4,"l":1,"s":9,"n":3,"o":2.0,"w":1.0,"h":7,"d":10},{"m":5,"l":1,"s":8,"n":3,"o":3.0,"w":2.0,"h":5,"d":10},{"m":6,"l":2,"s":13,"n":4,"o":6.0,"w":1.0,"h":5,"d":10},{"m":7,"l":2,"s":13,"n":7,"o":6.0,"w":1.0,"h":6,"d":10},{"m":8,"l":2,"s":16,"n":7,"o":6.0,"w":2.0,"h":4,"d":9},{"m":9,"l":2,"s":21,"n":7,"o":6.0,"w":3.0,"h":8,"d":10},{"m":10,"l":2,"s":21,"n":7,"o":6.0,"w":3.0,"h":10,"d":10},{"m":11,"l":2,"s":21,"n":7,"o":5.0,"w":4.0,"h":10,"d":10},{"m":12,"l":3,"s":24,"n":5,"o":6.0,"w":4.0,"h":10,"d":10},{"m":13,"l":3,"s":26,"n":11,"o":8.0,"w":5.0,"h":8,"d":10},{"m":14,"l":3,"s":28,"n":14,"o":10.0,"w":5.0,"h":8,"d":10},{"m":15,"l":3,"s":35,"n":18,"o":10.0,"w":6.0,"h":8,"d":10},{"m":16,"l":3,"s":37,"n":21,"o":12.0,"w":6.0,"h":8,"d":10},{"m":17,"l":3,"s":39,"n":21,"o":11.0,"w":7.0,"h":8,"d":10},{"m":18,"l":3,"s":38,"n":21,"o":11.0,"w":6.0,"h":8,"d":10},{"m":19,"l":3,"s":40,"n":21,"o":13.0,"w":6.0,"h":8,"d":10},{"m":20,"l":3,"s":42,"n":21,"o":12.0,"w":8.0,"h":8,"d":10},{"m":21,"l":3,"s":42,"n":21,"o":13.0,"w":8.0,"h":9,"d":10},{"m":22,"l":3,"s":42,"n":21,"o":13.0,"w":9.0,"h":10,"d":10},{"m":23,"l":3,"s":42,"n":21,"o":15.0,"w":9.0,"h":8,"d":10},{"m":24,"l":4,"s":46,"n":20,"o":19.0,"w":11.0,"h":8,"d":10},{"m":25,"l":4,"s":50,"n":23,"o":21.0,"w":11.0,"h":8,"d":10},{"m":26,"l":4,"s":54,"n":24,"o":23.0,"w":12.0,"h":9,"d":10},{"m":27,"l":4,"s":58,"n":25,"o":15.0,"w":11.0,"h":8,"d":8}]}];
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let cur = 0, month = 48, timer = null;
+const COL = {bg:'#0b1220', panel:'#0f1829', grid:'#1b2740', axis:'#6b7f9c',
+  txt:'#e6edf7', muted:'#8b9bb4', lv:'#7aa2f7', sk:'#34d399', wl:'#f59e0b',
+  bad:'#ef4444'};
+
+function resize(){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = Math.round(w * 0.36);
+  cv.width = w * dpr; cv.height = h * dpr;
+  cv.style.height = h + 'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  draw();
+}
+const PAD = {l:52,r:20,t:18,b:26};
+function dims(){const w=cv.clientWidth,h=cv.clientHeight;return {w,h,pw:w-PAD.l-PAD.r,ph:h-PAD.t-PAD.b};}
+function xOf(m,d){return PAD.l + (m-1)/47*d.pw;}
+function yLv(l,d){return PAD.t + (6-l)/6*d.ph;}
+function ySkill(s,d){return PAD.t + (1-Math.min(s,170)/170)*d.ph;}
+function yW(w,max,d){return PAD.t + (1-w/max)*d.ph;}
+
+function draw(){
+  const c = DATA[cur]; if(!c) return;
+  const d = dims();
+  ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);
+  // grid
+  ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+  for(let l=0;l<=6;l++){
+    const y = PAD.t + l/6*d.ph;
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(PAD.l+d.pw,y); ctx.stroke();
+  }
+  ctx.fillStyle = COL.axis; ctx.font = '11px system-ui';
+  for(let l=0;l<=6;l++){
+    const y = PAD.t + l/6*d.ph;
+    ctx.fillText('L'+(6-l), 10, y+4);
+  }
+  // 6-month review lines
+  ctx.strokeStyle = '#16233a';
+  for(let m=6;m<=48;m+=6){
+    const x = xOf(m,d);
+    ctx.beginPath(); ctx.moveTo(x,PAD.t); ctx.lineTo(x,PAD.t+d.ph); ctx.stroke();
+  }
+  // M24 danger
+  const x24 = xOf(24,d);
+  ctx.strokeStyle = COL.bad; ctx.setLineDash([4,4]); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x24,PAD.t); ctx.lineTo(x24,PAD.t+d.ph); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const vis = c.traj.filter(t=>t.m<=month);
+  if(!vis.length) return;
+  // wealth curve (scaled)
+  const wmax = Math.max(...c.traj.map(t=>t.w),1);
+  ctx.strokeStyle = COL.wl; ctx.lineWidth = 2.5; ctx.globalAlpha=.95;
+  ctx.beginPath();
+  vis.forEach((t,i)=>{const x=xOf(t.m,d), y=yW(t.w,wmax,d); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.stroke();
+  // skill curve
+  ctx.strokeStyle = COL.sk; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  vis.forEach((t,i)=>{const x=xOf(t.m,d), y=ySkill(t.s,d); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.stroke();
+  // level staircase
+  ctx.strokeStyle = COL.lv; ctx.lineWidth = 4; ctx.lineCap='round';
+  vis.forEach((t,i)=>{
+    const x1=xOf(t.m,d), x2=xOf(Math.min(t.m+1,48),d);
+    const y=yLv(t.l,d);
+    ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+  });
+  // promotion dots
+  let prev=null;
+  vis.forEach(t=>{
+    if(prev!==null && t.l!==prev){
+      const x=xOf(t.m,d), y=yLv(t.l,d);
+      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle=COL.lv; ctx.fill();
+      ctx.fillStyle=COL.txt; ctx.font='11px system-ui';
+      ctx.fillText('L'+t.l, x+8, y-7);
+    }
+    prev=t.l;
+  });
+  // playhead
+  const last = vis[vis.length-1];
+  const xp = xOf(last.m,d);
+  ctx.strokeStyle='#ffffff'; ctx.globalAlpha=.16; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(xp,PAD.t); ctx.lineTo(xp,PAD.t+d.ph); ctx.stroke();
+  ctx.globalAlpha=1;
+  // month labels
+  ctx.fillStyle=COL.axis; ctx.font='11px system-ui';
+  for(let m=1;m<=48;m+=6) ctx.fillText('M'+m, xOf(m,d)-8, PAD.t+d.ph+16);
+}
+
+function renderState(){
+  const c=DATA[cur]; if(!c) return;
+  const t = c.traj.filter(x=>x.m<=month).pop();
+  const box=document.getElementById('state');
+  if(!t){box.innerHTML='';return;}
+  const items=[['月份','M'+t.m],['职级','L'+t.l],['技能',t.s],['人脉',t.n],
+    ['产出',t.o],['财富',t.w.toFixed(1)],['身心',t.h],['尊严',t.d]];
+  box.innerHTML = items.map(([k,v])=>
+    `<div class="cell"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+}
+
+function renderCards(){
+  const box=document.getElementById('cases');
+  box.innerHTML = DATA.map((c,i)=>{
+    const cls = i===cur?'card on':'card';
+    return `<div class="${cls}" data-i="${i}">
+      <span class="tag">${c.tag}</span>
+      <h3>${c.headline}</h3>
+      <div class="num">${c.quant} <span style="font-size:12px;color:#8b9bb4">/ comp ${(c.quant*0.7).toFixed(2)}</span></div>
+      <div class="meta">L${c.finalLevel} · ${c.months} 个月 · ${c.outcome==='completed'?'完赛':(c.outcome==='eliminated'?'淘汰':'—')} · ${c.grade}</div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.card').forEach(el=>{
+    el.onclick=()=>{cur=+el.dataset.i; month=48; sync();};
+  });
+}
+
+function sync(){
+  const c=DATA[cur];
+  document.getElementById('bTitle').textContent =
+    c.headline + ' · ' + c.quant + ' 分（L' + c.finalLevel + '，' + c.months + ' 个月）';
+  document.getElementById('bNote').textContent = c.note;
+  const sl=document.getElementById('slider');
+  sl.max = c.months; sl.value = month;
+  document.getElementById('mlabel').textContent = 'M'+month;
+  renderCards(); draw(); renderState();
+}
+
+document.getElementById('slider').oninput = e=>{
+  month = +e.target.value;
+  document.getElementById('mlabel').textContent='M'+month;
+  draw(); renderState();
+};
+document.getElementById('reset').onclick=()=>{
+  stop(); month=DATA[cur].months;
+  document.getElementById('slider').value=month;
+  document.getElementById('mlabel').textContent='M'+month;
+  draw(); renderState();
+};
+function stop(){ if(timer){clearInterval(timer);timer=null;
+  document.getElementById('play').textContent='▶ 播放';} }
+document.getElementById('play').onclick=function(){
+  if(timer){stop();return;}
+  if(month>=DATA[cur].months) month=1;
+  this.textContent='⏸ 暂停';
+  timer=setInterval(()=>{
+    month++;
+    if(month>=DATA[cur].months){month=DATA[cur].months;stop();}
+    document.getElementById('slider').value=month;
+    document.getElementById('mlabel').textContent='M'+month;
+    draw(); renderState();
+  },70);
+};
+window.addEventListener('resize',resize);
+renderCards(); sync(); resize();
+</script>
+</body>
+</html>
