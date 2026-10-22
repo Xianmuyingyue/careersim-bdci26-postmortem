@@ -6,6 +6,13 @@
 
 ---
 
+> ### 🌐 在线复盘页
+> **[xianmuyingyue.github.io/careersim-bdci26-postmortem](https://xianmuyingyue.github.io/careersim-bdci26-postmortem/)**
+> — 成绩轨迹、晋升时序图、六盘典型案例（含斩杀线与选择困境）、105 队总榜，一页看完。
+> 交互案例集单独入口：[cases.html](https://xianmuyingyue.github.io/careersim-bdci26-postmortem/cases.html)
+
+---
+
 ## 一、结果速览
 
 | 项目 | 结果 |
