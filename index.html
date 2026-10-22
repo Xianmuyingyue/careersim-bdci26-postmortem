@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CareerSim-BDCI26 · 九问 参赛复盘</title>
+<meta name="description" content="CCF BDCI 2026 华为 openJiuwen 赛道：48 个月职场模拟智能体的参赛复盘、机制反推与六盘典型案例。">
+<style>
+  :root{
+    --bg:#0b1220; --panel:#131c2e; --panel2:#0f1829; --line:#1f2b42;
+    --txt:#e6edf7; --muted:#8b9bb4; --accent:#4ea1ff;
+    --lv:#7aa2f7; --sk:#34d399; --wl:#f59e0b; --bad:#ff5d5d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 26px}
+
+  header{padding:56px 0 30px;border-bottom:1px solid var(--line)}
+  .kicker{color:var(--muted);font-size:12.5px;letter-spacing:1.4px;text-transform:uppercase}
+  h1{margin:10px 0 12px;font-size:31px;line-height:1.3;letter-spacing:.2px}
+  .lead{color:#b9c7db;font-size:15.5px;max-width:720px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);border-radius:13px;
+    overflow:hidden;margin-top:28px}
+  .kpi{background:var(--panel2);padding:17px 19px}
+  .kpi b{display:block;font-size:27px;font-variant-numeric:tabular-nums;
+    color:var(--accent);line-height:1.2}
+  .kpi .u{font-size:13px;color:var(--muted);margin-left:3px}
+  .kpi > span{color:var(--muted);font-size:12px;display:block;margin-top:5px}
+  .kpi .u{display:inline;font-size:13px;color:var(--muted);margin-left:4px}
+  .kpi.hi b{color:var(--sk)}
+  .kpi.dim b{color:#c3cfe2;font-size:22px}
+
+  section{padding:44px 0 4px}
+  section h2{font-size:20px;margin:0 0 6px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 20px;max-width:760px}
+
+  /* 成绩轨迹 */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    padding:13px 15px;position:relative}
+  .step.peak{border-color:rgba(52,211,153,.55);background:rgba(52,211,153,.07)}
+  .step.dip{border-color:rgba(255,93,93,.42);background:rgba(255,93,93,.06)}
+  .sd{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+  .ss{font-size:23px;font-weight:600;font-variant-numeric:tabular-nums;margin:2px 0 1px}
+  .step.peak .ss{color:var(--sk)}
+  .step.dip .ss{color:var(--bad)}
+  .sp{font-size:12.5px;color:#9fc0ee}
+  .sn{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+  /* 图 */
+  figure{margin:0;background:var(--panel2);border:1px solid var(--line);
+    border-radius:14px;padding:12px}
+  figure img{width:100%;height:auto;display:block;border-radius:8px}
+  figcaption{color:var(--muted);font-size:12.5px;padding:10px 4px 2px}
+
+  /* 案例卡 */
+  .ccs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
+  .cc{display:block;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:15px 17px;transition:.16s;color:var(--txt)}
+  .cc:hover{transform:translateY(-2px);text-decoration:none;border-color:#31527f}
+  .cc.kill:hover{border-color:rgba(255,93,93,.6)}
+  .cc.turn:hover{border-color:rgba(52,211,153,.6)}
+  .ctag{display:inline-block;font-size:11px;padding:1px 9px;border-radius:99px;
+    background:#1d2b45;color:#9fc0ee}
+  .cc.kill .ctag{background:rgba(255,93,93,.16);color:#ffb3b3}
+  .cc.turn .ctag{background:rgba(52,211,153,.16);color:#9fe8c4}
+  .csc{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;margin:7px 0 1px}
+  .cmeta{font-size:12.5px;color:var(--muted)}
+  .cdil{font-size:13.5px;color:#c9d6e8;margin-top:9px;line-height:1.6}
+
+  /* 发现 */
+  .finds{display:grid;gap:11px}
+  .find{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:11px;padding:16px 19px}
+  .find h3{margin:0 0 7px;font-size:15.5px}
+  .find p{margin:0;font-size:13.8px;color:#c2cfe2}
+  code{background:#0a1526;border:1px solid var(--line);border-radius:4px;
+    padding:1px 5px;font-size:12.5px;color:#9fe8c4;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .find code{background:#0a1526;border:1px solid var(--line);border-radius:4px;
+    padding:1px 6px;font-size:12.5px;color:#9fe8c4}
+
+  /* 公式 */
+  pre{background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+    padding:15px 17px;overflow-x:auto;font-size:13px;line-height:1.75;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfe0f5;margin:0}
+
+  /* 榜单 */
+  details{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 18px}
+  summary{cursor:pointer;font-size:14.5px;color:#c3cfe2}
+  summary::marker{color:var(--muted)}
+  .tb{max-height:520px;overflow:auto;margin-top:14px;border-radius:9px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{position:sticky;top:0;background:#0d1626;text-align:left;color:var(--muted);
+    font-weight:500;padding:8px 10px;border-bottom:1px solid var(--line);z-index:1}
+  td{padding:5px 10px;border-bottom:1px solid #16203440;line-height:1.5}
+  tr.me td{background:rgba(78,161,255,.13);color:#fff}
+  td.num{font-variant-numeric:tabular-nums}
+  td.id{color:var(--muted);font-variant-numeric:tabular-nums}
+  td.dim{color:var(--muted)}
+
+  footer.wrap{margin-top:50px;padding:26px 26px 58px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:12.5px}
+  .fl{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="kicker">CCF BDCI 2026 · 华为 openJiuwen 赛道</div>
+  <h1>48 个月的职场模拟，我们把它当成一个可测量的系统来打</h1>
+  <p class="lead">
+    「九问」是一道 48 回合的职场生存模拟题：每个月做一次决策，六个月内接受一次评审。
+    我们不知道评分公式，也不知道事件后果——所以我们先用一百多局对局把引擎反推出来，
+    再据此写策略。这是完整的复盘记录。
+  </p>
+
+  <div class="kpis">
+    <div class="kpi hi"><b>57.46</b><span>最终得分（10-05 榜单）</span></div>
+    <div class="kpi"><b>82.09</b><span>换算定量分</span></div>
+    <div class="kpi dim"><b>12 <span class="u">/ 64</span></b><span>最终榜名次</span></div>
+    <div class="kpi dim"><b>40 <span class="u">/ 105</span></b><span>七期历史最佳合并名次</span></div>
+  </div>
+</header>
+
+<main>
+
+<section class="wrap">
+  <h2>五次提交的成绩轨迹</h2>
+  <p class="sub">平台按内容哈希去重：同一个包重传不重测、分数结转。所以 09-29 与 10-01 是同一个分数。</p>
+  <div class="steps">
+      <div class="step dip">
+        <div class="sd">09-27</div>
+        <div class="ss">44.86</div>
+        <div class="sp">v10</div>
+        <div class="sn">基线版本</div>
+      </div>
+      <div class="step ">
+        <div class="sd">09-29</div>
+        <div class="ss">53.39</div>
+        <div class="sp">v3_rerun</div>
+        <div class="sn">大幅提分</div>
+      </div>
+      <div class="step ">
+        <div class="sd">10-01</div>
+        <div class="ss">53.39</div>
+        <div class="sp">同包重传</div>
+        <div class="sn">平台哈希去重，分数结转</div>
+      </div>
+      <div class="step dip">
+        <div class="sd">10-03</div>
+        <div class="ss">39.84</div>
+        <div class="sp">v17</div>
+        <div class="sn">行为改动在 Test 上为负</div>
+      </div>
+      <div class="step peak">
+        <div class="sd">10-05</div>
+        <div class="ss">57.46</div>
+        <div class="sp">回滚包</div>
+        <div class="sn">回滚行为 + 变更哈希，历史新高</div>
+      </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>最好的一局：48 个月的晋升节奏</h2>
+  <p class="sub">每次晋升只发生在 6 的倍数月（评审在 <code>month%6==5</code> 结算、次月生效）。这一局拿到 L6，是全场唯一的真实封顶。</p>
+  <figure>
+    <img src="assets/promotion-timeline-best-run-dark.png" alt="最佳一局 48 个月晋升时序：M6 升 L2、M12 升 L3、M18 升 L4、M30 升 L5、M42 升 L6">
+    <figcaption>阶梯为职级，绿线为技能值，红竖线为 M24 固定处决点，灰网格为每 6 个月的评审窗口。</figcaption>
+  </figure>
+</section>
+
+<section class="wrap">
+  <h2>六种活法：把斩杀线摊开看</h2>
+  <p class="sub">从一百多局里挑出六个典型——一局封顶、五局死法各异。每局都有一处「怎么选都要付代价」的分叉点。</p>
+  <div class="ccs">
+      <a class="cc turn" href="cases.html">
+        <div class="ctag">最佳</div>
+        <div class="csc">76.28</div>
+        <div class="cmeta">L6 / 48 月 / 0 爆雷</div>
+        <div class="cdil">M20 选择靠技术而非靠关系 ⇒ M42 拿到 L6</div>
+      </a>
+      <a class="cc kill" href="cases.html">
+        <div class="ctag">45 月</div>
+        <div class="csc">57.62</div>
+        <div class="cmeta">L5 结束前差 3 个月</div>
+        <div class="cdil">举报 VP 保尊严 vs 降职保饭碗 ⇒ 第二次爆雷</div>
+      </a>
+      <a class="cc kill" href="cases.html">
+        <div class="ctag">24 月</div>
+        <div class="csc">32.06</div>
+        <div class="cmeta">M24 固定处决点</div>
+        <div class="cdil">体力拿去保「安全感」而非顶产出 ⇒ 两次绩效不佳</div>
+      </a>
+      <a class="cc kill" href="cases.html">
+        <div class="ctag">3 月</div>
+        <div class="csc">21.52</div>
+        <div class="cmeta">最短命的一局</div>
+        <div class="cdil">跨部门救火请缨 vs 守本职 ⇒ health 5→2→1→0</div>
+      </a>
+      <a class="cc kill" href="cases.html">
+        <div class="ctag">48 月</div>
+        <div class="csc">48.89</div>
+        <div class="cmeta">全勤但归零</div>
+        <div class="cdil">Leader 要甩锅下属，签 vs 不签 ⇒ 共担后 M48 爆雷</div>
+      </a>
+      <a class="cc kill" href="cases.html">
+        <div class="ctag">27 月</div>
+        <div class="csc">38.24</div>
+        <div class="cmeta">绩效 A 的陷阱</div>
+        <div class="cdil">接烫手山芋 ⇒ 揽责 ⇒ 拒甩锅 ⇒ 爆雷</div>
+      </a>
+  </div>
+  <p class="sub" style="margin-top:16px">
+    <a href="cases.html">→ 打开交互版案例集</a>（可切换对局、拖动时间轴、跳到斩杀线）
+  </p>
+</section>
+
+<section class="wrap">
+  <h2>两个最重要的发现</h2>
+  <div class="finds">
+    <div class="find">
+      <h3>一、榜单分数是 <code>定量分 × 0.7</code>，且没有 token 惩罚</h3>
+      <p>
+        105 局全量核验，比值 0.699993 ± 0.00008、零违例。此前一度以为存在「上下文超长扣分」，
+        这个猜测是错的——它让我们白白缩小了技能包的体量。
+      </p>
+    </div>
+    <div class="find">
+      <h3>二、截止前正确的动作是「回滚 + 换哈希」，而不是「改行为」</h3>
+      <p>
+        平台按内容哈希去重：同包重传不重测；换哈希即触发重测，而评测本身是随机抽样。
+        所以同一套策略可以被抽好几次。10-05 我们提交了一个行为完全回滚、只多一行注释的包，
+        抽到了 57.46——而此前那次「认真改进」的 v17 只拿到 39.84。
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>反推出来的评分公式</h2>
+  <p class="sub">全量校验最大残差 0.005。</p>
+<pre>quant = 3·L + 0.25·W + 0.75·(H+D) + 0.125·min(S,120)
+      + (10 − 风险值) + 0.1667·min(N,60)
+
+L 职级   W 财富   H+D 身心和   S 技能   N 人脉
+风险值 = 爆雷次数×5 + hidden_risk</pre>
+  <p class="sub" style="margin-top:14px">
+    满分 100 分对应榜单 70 分，余 30 分为专家评审。后四项（身心 / 技能 / 风控 / 人脉）实测可拿满 = 50 分，
+    于是「能不能达标」这个问题塌缩成 <code>3L + 0.25W = 39.19</code>——全部差距都落在晋升速度这一个变量上。
+  </p>
+</section>
+
+<section class="wrap">
+  <h2>七期历史总榜</h2>
+  <p class="sub">105 支队伍，每队取跨期历史最高分。第三方队名已统一匿名化为 T###，仅保留队伍 ID 与分数。</p>
+  <details>
+    <summary>展开完整榜单（我方第 40 名，已高亮）</summary>
+    <div class="tb">
+      <table>
+        <thead><tr><th>名次</th><th>队伍 ID</th><th>队名</th><th>历史最高</th><th>达成日</th><th>末次分数</th></tr></thead>
+        <tbody>
+<tr><td>1</td><td class='id'>369647</td><td>T001</td><td class='num'>63.31</td><td class='dim'>9/23</td><td class='num dim'>62.08</td></tr>
+<tr><td>2</td><td class='id'>369532</td><td>T002</td><td class='num'>62.99</td><td class='dim'>9/24</td><td class='num dim'>52.23</td></tr>
+<tr><td>3</td><td class='id'>369627</td><td>T003</td><td class='num'>62.62</td><td class='dim'>9/29</td><td class='num dim'>62.62</td></tr>
+<tr><td>4</td><td class='id'>369839</td><td>T004</td><td class='num'>62.43</td><td class='dim'>9/27</td><td class='num dim'>59.45</td></tr>
+<tr><td>5</td><td class='id'>369576</td><td>T005</td><td class='num'>62.20</td><td class='dim'>10/5</td><td class='num dim'>62.20</td></tr>
+<tr><td>6</td><td class='id'>369672</td><td>T006</td><td class='num'>61.37</td><td class='dim'>10/3</td><td class='num dim'>61.37</td></tr>
+<tr><td>7</td><td class='id'>369338</td><td>T007</td><td class='num'>61.29</td><td class='dim'>9/23</td><td class='num dim'>33.73</td></tr>
+<tr><td>8</td><td class='id'>362492</td><td>T008</td><td class='num'>61.10</td><td class='dim'>10/5</td><td class='num dim'>61.10</td></tr>
+<tr><td>9</td><td class='id'>369666</td><td>T009</td><td class='num'>61.09</td><td class='dim'>10/3</td><td class='num dim'>55.93</td></tr>
+<tr><td>10</td><td class='id'>369819</td><td>T010</td><td class='num'>61.07</td><td class='dim'>10/3</td><td class='num dim'>—</td></tr>
+<tr><td>11</td><td class='id'>369382</td><td>T011</td><td class='num'>60.90</td><td class='dim'>9/27</td><td class='num dim'>42.30</td></tr>
+<tr><td>12</td><td class='id'>363390</td><td>T012</td><td class='num'>60.59</td><td class='dim'>9/29</td><td class='num dim'>38.37</td></tr>
+<tr><td>13</td><td class='id'>369603</td><td>T013</td><td class='num'>60.53</td><td class='dim'>10/1</td><td class='num dim'>55.94</td></tr>
+<tr><td>14</td><td class='id'>362124</td><td>T014</td><td class='num'>60.52</td><td class='dim'>10/3</td><td class='num dim'>46.33</td></tr>
+<tr><td>15</td><td class='id'>369580</td><td>T015</td><td class='num'>60.33</td><td class='dim'>9/23</td><td class='num dim'>60.33</td></tr>
+<tr><td>16</td><td class='id'>369738</td><td>T016</td><td class='num'>60.33</td><td class='dim'>9/27</td><td class='num dim'>60.33</td></tr>
+<tr><td>17</td><td class='id'>369540</td><td>T017</td><td class='num'>60.19</td><td class='dim'>9/23</td><td class='num dim'>47.47</td></tr>
+<tr><td>18</td><td class='id'>369611</td><td>T018</td><td class='num'>59.92</td><td class='dim'>9/23</td><td class='num dim'>50.90</td></tr>
+<tr><td>19</td><td class='id'>362174</td><td>T019</td><td class='num'>59.88</td><td class='dim'>10/5</td><td class='num dim'>59.88</td></tr>
+<tr><td>20</td><td class='id'>369854</td><td>T020</td><td class='num'>59.86</td><td class='dim'>10/5</td><td class='num dim'>59.86</td></tr>
+<tr><td>21</td><td class='id'>369727</td><td>T021</td><td class='num'>59.57</td><td class='dim'>9/24</td><td class='num dim'>59.57</td></tr>
+<tr><td>22</td><td class='id'>369368</td><td>T022</td><td class='num'>59.55</td><td class='dim'>9/24</td><td class='num dim'>59.55</td></tr>
+<tr><td>23</td><td class='id'>367482</td><td>T023</td><td class='num'>59.44</td><td class='dim'>9/27</td><td class='num dim'>39.16</td></tr>
+<tr><td>24</td><td class='id'>365713</td><td>T024</td><td class='num'>59.29</td><td class='dim'>9/29</td><td class='num dim'>40.28</td></tr>
+<tr><td>25</td><td class='id'>369376</td><td>T025</td><td class='num'>59.24</td><td class='dim'>10/1</td><td class='num dim'>41.03</td></tr>
+<tr><td>26</td><td class='id'>365029</td><td>T026</td><td class='num'>59.21</td><td class='dim'>10/3</td><td class='num dim'>59.21</td></tr>
+<tr><td>27</td><td class='id'>369659</td><td>T027</td><td class='num'>58.99</td><td class='dim'>10/3</td><td class='num dim'>44.75</td></tr>
+<tr><td>28</td><td class='id'>369739</td><td>T028</td><td class='num'>58.88</td><td class='dim'>10/5</td><td class='num dim'>58.88</td></tr>
+<tr><td>29</td><td class='id'>369883</td><td>T029</td><td class='num'>58.76</td><td class='dim'>10/1</td><td class='num dim'>39.71</td></tr>
+<tr><td>30</td><td class='id'>362100</td><td>T030</td><td class='num'>58.47</td><td class='dim'>9/24</td><td class='num dim'>56.88</td></tr>
+<tr><td>31</td><td class='id'>368818</td><td>T031</td><td class='num'>58.41</td><td class='dim'>10/1</td><td class='num dim'>58.41</td></tr>
+<tr><td>32</td><td class='id'>369476</td><td>T032</td><td class='num'>58.26</td><td class='dim'>9/27</td><td class='num dim'>35.71</td></tr>
+<tr><td>33</td><td class='id'>369211</td><td>T033</td><td class='num'>58.14</td><td class='dim'>9/23</td><td class='num dim'>39.87</td></tr>
+<tr><td>34</td><td class='id'>362478</td><td>T034</td><td class='num'>58.05</td><td class='dim'>9/29</td><td class='num dim'>58.05</td></tr>
+<tr><td>35</td><td class='id'>362106</td><td>T035</td><td class='num'>58.01</td><td class='dim'>9/27</td><td class='num dim'>45.11</td></tr>
+<tr><td>36</td><td class='id'>369751</td><td>T036</td><td class='num'>57.98</td><td class='dim'>10/5</td><td class='num dim'>57.98</td></tr>
+<tr><td>37</td><td class='id'>369439</td><td>T037</td><td class='num'>57.87</td><td class='dim'>9/24</td><td class='num dim'>55.65</td></tr>
+<tr><td>38</td><td class='id'>369501</td><td>T038</td><td class='num'>57.82</td><td class='dim'>10/1</td><td class='num dim'>50.67</td></tr>
+<tr><td>39</td><td class='id'>369610</td><td>T039</td><td class='num'>57.74</td><td class='dim'>9/27</td><td class='num dim'>49.19</td></tr>
+<tr class="me"><td>40</td><td class='id'>369706</td><td><b>悟空</b></td><td class='num'>57.46</td><td class='dim'>10/5</td><td class='num dim'>57.46</td></tr>
+<tr><td>41</td><td class='id'>369329</td><td>T041</td><td class='num'>57.22</td><td class='dim'>9/29</td><td class='num dim'>36.92</td></tr>
+<tr><td>42</td><td class='id'>369654</td><td>T042</td><td class='num'>57.21</td><td class='dim'>10/5</td><td class='num dim'>57.21</td></tr>
+<tr><td>43</td><td class='id'>363357</td><td>T043</td><td class='num'>57.14</td><td class='dim'>10/1</td><td class='num dim'>36.10</td></tr>
+<tr><td>44</td><td class='id'>363603</td><td>T044</td><td class='num'>57.07</td><td class='dim'>10/3</td><td class='num dim'>41.20</td></tr>
+<tr><td>45</td><td class='id'>365952</td><td>T045</td><td class='num'>56.74</td><td class='dim'>9/29</td><td class='num dim'>33.65</td></tr>
+<tr><td>46</td><td class='id'>369343</td><td>T046</td><td class='num'>56.74</td><td class='dim'>10/1</td><td class='num dim'>30.97</td></tr>
+<tr><td>47</td><td class='id'>369495</td><td>T047</td><td class='num'>56.41</td><td class='dim'>9/24</td><td class='num dim'>56.41</td></tr>
+<tr><td>48</td><td class='id'>369680</td><td>T048</td><td class='num'>56.18</td><td class='dim'>9/23</td><td class='num dim'>39.18</td></tr>
+<tr><td>49</td><td class='id'>369875</td><td>T049</td><td class='num'>56.09</td><td class='dim'>10/3</td><td class='num dim'>35.73</td></tr>
+<tr><td>50</td><td class='id'>369808</td><td>T050</td><td class='num'>56.07</td><td class='dim'>9/24</td><td class='num dim'>37.58</td></tr>
+<tr><td>51</td><td class='id'>369786</td><td>T051</td><td class='num'>55.86</td><td class='dim'>9/27</td><td class='num dim'>37.46</td></tr>
+<tr><td>52</td><td class='id'>369705</td><td>T052</td><td class='num'>55.61</td><td class='dim'>9/27</td><td class='num dim'>50.19</td></tr>
+<tr><td>53</td><td class='id'>362354</td><td>T053</td><td class='num'>55.53</td><td class='dim'>9/23</td><td class='num dim'>55.53</td></tr>
+<tr><td>54</td><td class='id'>369822</td><td>T054</td><td class='num'>55.12</td><td class='dim'>10/3</td><td class='num dim'>36.92</td></tr>
+<tr><td>55</td><td class='id'>365659</td><td>T055</td><td class='num'>55.01</td><td class='dim'>10/3</td><td class='num dim'>53.71</td></tr>
+<tr><td>56</td><td class='id'>369759</td><td>T056</td><td class='num'>54.89</td><td class='dim'>10/3</td><td class='num dim'>54.89</td></tr>
+<tr><td>57</td><td class='id'>362257</td><td>T057</td><td class='num'>54.65</td><td class='dim'>9/27</td><td class='num dim'>39.24</td></tr>
+<tr><td>58</td><td class='id'>369886</td><td>T058</td><td class='num'>54.49</td><td class='dim'>10/3</td><td class='num dim'>39.07</td></tr>
+<tr><td>59</td><td class='id'>369628</td><td>T059</td><td class='num'>54.40</td><td class='dim'>9/23</td><td class='num dim'>54.40</td></tr>
+<tr><td>60</td><td class='id'>369557</td><td>T060</td><td class='num'>54.38</td><td class='dim'>10/1</td><td class='num dim'>42.13</td></tr>
+<tr><td>61</td><td class='id'>362205</td><td>T061</td><td class='num'>54.29</td><td class='dim'>9/24</td><td class='num dim'>32.01</td></tr>
+<tr><td>62</td><td class='id'>369505</td><td>T062</td><td class='num'>54.21</td><td class='dim'>10/1</td><td class='num dim'>34.20</td></tr>
+<tr><td>63</td><td class='id'>362273</td><td>T063</td><td class='num'>54.12</td><td class='dim'>9/24</td><td class='num dim'>52.52</td></tr>
+<tr><td>64</td><td class='id'>362957</td><td>T064</td><td class='num'>54.10</td><td class='dim'>9/27</td><td class='num dim'>38.99</td></tr>
+<tr><td>65</td><td class='id'>368810</td><td>T065</td><td class='num'>54.03</td><td class='dim'>10/3</td><td class='num dim'>40.98</td></tr>
+<tr><td>66</td><td class='id'>362322</td><td>T066</td><td class='num'>53.88</td><td class='dim'>9/23</td><td class='num dim'>53.88</td></tr>
+<tr><td>67</td><td class='id'>369621</td><td>T067</td><td class='num'>53.77</td><td class='dim'>10/3</td><td class='num dim'>37.25</td></tr>
+<tr><td>68</td><td class='id'>369361</td><td>T068</td><td class='num'>52.98</td><td class='dim'>9/27</td><td class='num dim'>35.70</td></tr>
+<tr><td>69</td><td class='id'>369673</td><td>T069</td><td class='num'>52.69</td><td class='dim'>10/1</td><td class='num dim'>52.69</td></tr>
+<tr><td>70</td><td class='id'>369653</td><td>T070</td><td class='num'>52.61</td><td class='dim'>10/5</td><td class='num dim'>52.61</td></tr>
+<tr><td>71</td><td class='id'>369345</td><td>T071</td><td class='num'>52.59</td><td class='dim'>9/29</td><td class='num dim'>—</td></tr>
+<tr><td>72</td><td class='id'>369624</td><td>T072</td><td class='num'>52.55</td><td class='dim'>9/27</td><td class='num dim'>39.99</td></tr>
+<tr><td>73</td><td class='id'>368834</td><td>T073</td><td class='num'>52.47</td><td class='dim'>9/23</td><td class='num dim'>50.65</td></tr>
+<tr><td>74</td><td class='id'>364016</td><td>T074</td><td class='num'>52.40</td><td class='dim'>10/3</td><td class='num dim'>37.55</td></tr>
+<tr><td>75</td><td class='id'>369623</td><td>T075</td><td class='num'>52.11</td><td class='dim'>10/5</td><td class='num dim'>52.11</td></tr>
+<tr><td>76</td><td class='id'>368848</td><td>T076</td><td class='num'>51.76</td><td class='dim'>9/27</td><td class='num dim'>51.76</td></tr>
+<tr><td>77</td><td class='id'>362175</td><td>T077</td><td class='num'>51.13</td><td class='dim'>10/1</td><td class='num dim'>40.23</td></tr>
+<tr><td>78</td><td class='id'>369190</td><td>T078</td><td class='num'>50.31</td><td class='dim'>9/27</td><td class='num dim'>36.67</td></tr>
+<tr><td>79</td><td class='id'>365654</td><td>T079</td><td class='num'>50.16</td><td class='dim'>10/3</td><td class='num dim'>50.16</td></tr>
+<tr><td>80</td><td class='id'>369392</td><td>T080</td><td class='num'>49.35</td><td class='dim'>10/5</td><td class='num dim'>49.35</td></tr>
+<tr><td>81</td><td class='id'>369564</td><td>T081</td><td class='num'>48.83</td><td class='dim'>9/27</td><td class='num dim'>48.83</td></tr>
+<tr><td>82</td><td class='id'>369696</td><td>T082</td><td class='num'>47.96</td><td class='dim'>9/23</td><td class='num dim'>37.60</td></tr>
+<tr><td>83</td><td class='id'>368470</td><td>T083</td><td class='num'>46.87</td><td class='dim'>9/29</td><td class='num dim'>—</td></tr>
+<tr><td>84</td><td class='id'>368806</td><td>T084</td><td class='num'>43.31</td><td class='dim'>9/23</td><td class='num dim'>43.31</td></tr>
+<tr><td>85</td><td class='id'>369821</td><td>T085</td><td class='num'>42.12</td><td class='dim'>9/27</td><td class='num dim'>42.12</td></tr>
+<tr><td>86</td><td class='id'>369686</td><td>T086</td><td class='num'>40.92</td><td class='dim'>9/24</td><td class='num dim'>40.92</td></tr>
+<tr><td>87</td><td class='id'>369787</td><td>T087</td><td class='num'>40.26</td><td class='dim'>10/1</td><td class='num dim'>40.26</td></tr>
+<tr><td>88</td><td class='id'>365667</td><td>T088</td><td class='num'>40.23</td><td class='dim'>9/23</td><td class='num dim'>40.23</td></tr>
+<tr><td>89</td><td class='id'>369591</td><td>T089</td><td class='num'>39.77</td><td class='dim'>10/3</td><td class='num dim'>39.77</td></tr>
+<tr><td>90</td><td class='id'>369568</td><td>T090</td><td class='num'>39.54</td><td class='dim'>9/23</td><td class='num dim'>39.54</td></tr>
+<tr><td>91</td><td class='id'>369183</td><td>T091</td><td class='num'>39.46</td><td class='dim'>10/5</td><td class='num dim'>39.46</td></tr>
+<tr><td>92</td><td class='id'>362339</td><td>T092</td><td class='num'>39.15</td><td class='dim'>10/5</td><td class='num dim'>39.15</td></tr>
+<tr><td>93</td><td class='id'>369598</td><td>T093</td><td class='num'>38.73</td><td class='dim'>9/23</td><td class='num dim'>38.73</td></tr>
+<tr><td>94</td><td class='id'>362078</td><td>T094</td><td class='num'>38.67</td><td class='dim'>9/27</td><td class='num dim'>38.67</td></tr>
+<tr><td>95</td><td class='id'>369869</td><td>T095</td><td class='num'>38.63</td><td class='dim'>10/5</td><td class='num dim'>38.63</td></tr>
+<tr><td>96</td><td class='id'>369742</td><td>T096</td><td class='num'>38.44</td><td class='dim'>9/24</td><td class='num dim'>38.44</td></tr>
+<tr><td>97</td><td class='id'>369837</td><td>T097</td><td class='num'>37.87</td><td class='dim'>10/1</td><td class='num dim'>37.87</td></tr>
+<tr><td>98</td><td class='id'>369566</td><td>T098</td><td class='num'>37.54</td><td class='dim'>9/23</td><td class='num dim'>37.54</td></tr>
+<tr><td>99</td><td class='id'>369879</td><td>T099</td><td class='num'>36.73</td><td class='dim'>10/1</td><td class='num dim'>36.73</td></tr>
+<tr><td>100</td><td class='id'>362157</td><td>T100</td><td class='num'>36.10</td><td class='dim'>10/5</td><td class='num dim'>36.10</td></tr>
+<tr><td>101</td><td class='id'>362265</td><td>T101</td><td class='num'>35.83</td><td class='dim'>9/23</td><td class='num dim'>35.83</td></tr>
+<tr><td>102</td><td class='id'>369693</td><td>T102</td><td class='num'>35.77</td><td class='dim'>10/5</td><td class='num dim'>35.77</td></tr>
+<tr><td>103</td><td class='id'>367255</td><td>T103</td><td class='num'>35.54</td><td class='dim'>9/24</td><td class='num dim'>35.54</td></tr>
+<tr><td>104</td><td class='id'>369470</td><td>T104</td><td class='num'>35.47</td><td class='dim'>9/27</td><td class='num dim'>35.47</td></tr>
+<tr><td>105</td><td class='id'>364013</td><td>T105</td><td class='num'>33.69</td><td class='dim'>9/29</td><td class='num dim'>33.58</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <div>本页只包含我方独立撰写的分析与复盘；比赛相关规则、数据与品牌归赛事主办方所有。</div>
+  <div class="fl">
+    <a href="https://github.com/Xianmuyingyue/careersim-bdci26-postmortem">GitHub 仓库</a>
+    <a href="cases.html">交互案例集</a>
+    <a href="https://github.com/Xianmuyingyue/careersim-bdci26-postmortem/blob/main/results/leaderboard-105.md">完整榜单数据</a>
+    <a href="https://github.com/Xianmuyingyue/careersim-bdci26-postmortem/tree/main/posts/postmortem">复盘长文</a>
+  </div>
+</footer>
+
+</body>
+</html>
